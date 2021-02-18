@@ -44,9 +44,9 @@ def newqc(theta, phi, lam, qb):
 
 # creat random parameters to build a random state on the Bloch sphere
 
-theta = random.uniform(0,1)*pi
-phi = random.uniform(0,1)*pi
-lam = random.uniform(0,1)*pi
+theta = random.uniform(0,1)*2*pi
+phi = random.uniform(0,1)*2*pi
+lam = random.uniform(0,1)*2*pi
 
 print("parameters theta, phi, and lam are: ", theta, phi, lam)
 
