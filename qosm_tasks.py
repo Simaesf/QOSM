@@ -20,7 +20,7 @@
 
 # ## Solution: 
 #########################################################################################################################
-#Part 1)
+# ##Part 1)
 
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, Aer, execute, transpile
@@ -33,6 +33,7 @@ import random
 
 get_ipython().run_line_magic('matplotlib', 'inline')
 
+# Defining a function that generates a random state on the bloch sphere
 
 def newqc(theta, phi, lam, qb):
     myqc = QuantumCircuit(1)
@@ -41,8 +42,7 @@ def newqc(theta, phi, lam, qb):
     myqc.u(theta, phi, lam, qb)
     return myqc 
 
-
-
+# creat random parameters to build a random state on the Bloch sphere
 
 theta = random.uniform(0,1)*pi
 phi = random.uniform(0,1)*pi
@@ -52,7 +52,8 @@ print("parameters theta, phi, and lam are: ", theta, phi, lam)
 
 random_circuit = newqc(theta, phi, lam, 0)
 state = Statevector.from_instruction(random_circuit)
-
+sv = state.data
+print("The state vector of our random state on the Bloch sphere is: " , sv)
 plot_bloch_multivector (state)
 plot_state_qsphere(state, show_state_labels=True)
 
@@ -109,7 +110,6 @@ plot_bloch_multivector(state1)
 
 # ## Part 3)
 
-
 # define a random product state with N qubits: 
 
 N = 3
@@ -155,7 +155,11 @@ def Nqubit_rand_qc(t,p,l, qubits):
 Nqubit_qc = Nqubit_rand_qc(t,p,l, qubits2)
 Nqubit_qc.draw()
 
-# defining the function to measure the similarity of 2 given quantum circuits using the swap test
+''' 
+defining the function to measure the similarity of 2 given quantum circuits using the swap test
+(This function is a general form of what we defined in part (1), which means we can use function
+similarity2 with N=1 to solve the first part.
+'''
 
 def similarity2(circuit1, circuit2, num_qubits):
     overlap_test_qc = QuantumCircuit(2*N+1,1)
