@@ -18,7 +18,9 @@
 # 
 
 
-# ## Solution: Part 1)
+# ## Solution: 
+#########################################################################################################################
+#Part 1)
 
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, Aer, execute, transpile
@@ -54,7 +56,7 @@ state = Statevector.from_instruction(random_circuit)
 plot_bloch_multivector (state)
 plot_state_qsphere(state, show_state_labels=True)
 
-
+#############################################################################################################################
 # ## Part 2) 
 
 
@@ -103,5 +105,91 @@ state1 = Statevector.from_instruction(approximation_circuit)
 plot_bloch_multivector(state1)
 
 
+###################################################################################################################################
+
 # ## Part 3)
 
+
+# define a random product state with N qubits: 
+
+N = 3
+Allqubits = list(range(2*N+1))
+qubits1 = Allqubits[1:N+1]
+qubits2 = Allqubits[N+1:2*N+1]
+
+# creating a random state:
+def state_label(n): 
+    state = "" 
+    for i in range(n): 
+        bit = str(random.randint(0, 1)) 
+        state += bit 
+          
+    return(state)
+
+qstate = state_label(N) 
+print("random quantum state is: ", qstate) 
+new_state = Statevector.from_label(qstate)
+new_state.data
+
+# create a circuit that represents the product state
+
+state_qcircuit = QuantumCircuit(N)
+state_qcircuit.initialize(new_state.data, qubits=list(range(N)))
+state_qcircuit.draw('mpl',style={'name': 'bw'},  scale = 1)
+
+# defining a function to creat a N-qubit quantum circuit with a random state given the totation parameters
+# on the Bloch sphere
+
+def Nqubit_rand_qc(t,p,l, qubits):
+    Nqubit_qc = QuantumCircuit(N)
+    for i in range(N):
+        t = random.uniform(0,1)*2*pi
+        p = random.uniform(0,1)*2*pi
+        l = random.uniform(0,1)*2*pi
+        Nqubit_qc.u(t, p, l, i)
+    Nqubit_qc.draw('mpl',style={'name': 'bw'},  scale = 1.2)
+    return(Nqubit_qc)
+
+# creat a N-qubit circuit for random state on Bloch sphere:
+
+Nqubit_qc = Nqubit_rand_qc(t,p,l, qubits2)
+Nqubit_qc.draw()
+
+# defining the function to measure the similarity of 2 given quantum circuits using the swap test
+
+def similarity2(circuit1, circuit2, num_qubits):
+    overlap_test_qc = QuantumCircuit(2*N+1,1)
+    overlap_test_qc.h(0)
+    
+    overlap_test_qc.compose(circuit1, qubits=qubits1, inplace=True)
+    overlap_test_qc.compose(circuit2, qubits=qubits2, inplace=True)
+    
+    for i in range(num_qubits):
+        overlap_test_qc.cswap(0,i+1,i+1+num_qubits)
+        
+    overlap_test_qc.h(0)
+    overlap_test_qc.measure([0],[0])
+    backend = Aer.get_backend('qasm_simulator')
+    job = execute(overlap_test_qc, backend, shots = 10000)
+    prob = job.result().get_counts()['0']/10000    
+    return prob 
+
+# comparing the random state we generated in part one with an approximated circuit to find the parameters
+
+accuracy = 0
+threshold_prob= 0.9
+iteration = 0
+
+while accuracy < threshold_prob:
+    Nqubit_qc = QuantumCircuit(N)
+    for i in range(N):
+        t = random.uniform(0,1)*2*pi
+        p = random.uniform(0,1)*2*pi
+        l = random.uniform(0,1)*2*pi
+        Nqubit_qc.u(t, p, l, i)
+    accuracy = similarity2(state_qcircuit, Nqubit_qc, num_qubits=N)
+    iteration += 1
+print("The best match was found in ", iteration, "iterations with ",  accuracy*100 , " percent accuracy.")
+print("The best choice of parameters for this match is: theta=", t, " phi=", p , " lam= ", l)
+state2 = Statevector.from_instruction(Nqubit_qc)
+plot_state_qsphere(state2)
